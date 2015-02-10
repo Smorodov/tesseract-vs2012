@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Package" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<SourceDir>$(MSBuildProjectDirectory)</SourceDir>
+		<BuildDir>$(MSBuildProjectDirectory)\build</BuildDir>
+		<ReleaseDir>$(MSBuildProjectDirectory)\release</ReleaseDir>
+		<ZLibDir>$(MSBuildProjectDirectory)\zlib</ZLibDir>
+		<LibJpegDir>$(MSBuildProjectDirectory)\libjpeg</LibJpegDir>
+		<LibPngDir>$(MSBuildProjectDirectory)\libpng</LibPngDir>
+		<LibGifDir>$(MSBuildProjectDirectory)\giflib</LibGifDir>
+		<LibTiffDir>$(MSBuildProjectDirectory)\libtiff\libtiff</LibTiffDir>	
+		<LibLeptDir>$(MSBuildProjectDirectory)\liblept</LibLeptDir>
+	</PropertyGroup>
+	<ItemGroup>
+		<Template Include="$(SourceDir)\AssemblyVersionInfo.template.cs" />
+		
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>DLL_Debug</Configuration>
+			<Platform>Win32</Platform>
+		</Flavor>
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>DLL_Release</Configuration>
+			<Platform>Win32</Platform>
+		</Flavor>
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>DLL_Debug</Configuration>
+			<Platform>x64</Platform>
+		</Flavor>
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>DLL_Release</Configuration>
+			<Platform>x64</Platform>
+		</Flavor>
+		
+		
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>LIB_Debug</Configuration>
+			<Platform>Win32</Platform>
+		</Flavor>
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>LIB_Release</Configuration>
+			<Platform>Win32</Platform>
+		</Flavor>
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>LIB_Debug</Configuration>
+			<Platform>x64</Platform>
+		</Flavor>
+		<Flavor Include="$(SourceDir)\Tesseract.sln">
+			<Configuration>LIB_Release</Configuration>
+			<Platform>x64</Platform>
+		</Flavor>
+	
+		<Header Include="$(ZLibDir)\include\zconf.h" />
+		<Header Include="$(ZLibDir)\include\zlib.h" />
+		
+		<Header Include="$(LibPngDir)\include\png.h" />
+		<Header Include="$(LibPngDir)\include\pngconf.h" />
+		
+		<Header Include="$(LibJpegDir)\include\jconfig.h" />
+		<Header Include="$(LibJpegDir)\include\jerror.h" />
+		<Header Include="$(LibJpegDir)\include\jmorecfg.h" />
+		<Header Include="$(LibJpegDir)\include\jpeglib.h" />
+		
+		<Header Include="$(LibTiffDir)\include\tif_config.h" />
+		<Header Include="$(LibTiffDir)\include\tiff.h" />
+		<Header Include="$(LibTiffDir)\include\tiffconf.h" />
+		<Header Include="$(LibTiffDir)\include\tiffio.h" />
+		<Header Include="$(LibTiffDir)\include\tiffvers.h" />
+		
+		<Header Include="$(LibGifDir)\include\gif_lib.h" />
+	
+		<LeptHeader Include="$(LibLeptDir)\include\*.h" />
+	</ItemGroup>
+	<Target Name="ExpandFlavors">
+		<CreateItem Include="@(Flavor)" AdditionalMetadata="Properties=Configuration=%(Flavor.Configuration)%3BPlatform=%(Flavor.Platform)">
+			<Output TaskParameter="Include" ItemName="ProjectToBuild" />
+		</CreateItem>
+	</Target>
+	<Target Name="Clean" DependsOnTargets="ExpandFlavors">
+		<MSBuild Projects="@(ProjectToBuild)" Targets="Clean" />
+		<RemoveDir Directories="$(BuildDir)" />
+	</Target>
+	<Target Name="Build" DependsOnTargets="ExpandFlavors">
+		<MSBuild Projects="@(ProjectToBuild)" Targets="Build" />
+		<ItemGroup>
+			<LibFile Include="$(BuildDir)\lib\**\*.dll;
+							  $(BuildDir)\lib\**\*.lib;"/>
+		</ItemGroup>
+	</Target>
+	<Target Name="Package" DependsOnTargets="Build">
+		<RemoveDir Directories='$(ReleaseDir)'/>
+		<MakeDir Directories='$(ReleaseDir)'/>		
+		<Copy SourceFiles="@(Header)" DestinationFolder="$(ReleaseDir)\include" />
+		<Copy SourceFiles="@(LeptHeader)" DestinationFolder="$(ReleaseDir)\include\leptonica" />	
+		<Copy SourceFiles="@(LibFile)" DestinationFolder="$(ReleaseDir)\lib\%(RecursiveDir)" />
+	</Target>
+
+</Project>

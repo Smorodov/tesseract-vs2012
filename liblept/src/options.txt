@@ -1,0 +1,11 @@
+--recursive
+--style=allman
+--indent=tab
+--indent-classes
+--indent-switches
+--indent-cases
+--indent-namespaces
+--indent-preprocessor
+--indent-col1-comments
+--delete-empty-lines
+--add-brackets
